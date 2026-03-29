@@ -51,9 +51,7 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  .header {
-    margin-bottom: 32px;
-  }
+  .header { margin-bottom: 32px; }
 
   .badge {
     display: inline-flex;
@@ -154,9 +152,7 @@
     color: var(--text);
   }
 
-  input::placeholder {
-    color: var(--muted);
-  }
+  input::placeholder { color: var(--muted); }
 
   .divider {
     height: 1px;
@@ -273,18 +269,18 @@ async function loadData() {
     const aufgabenResp = await fetch(`${firebaseBaseUrl}/aufgaben.json`);
     aufgabenData = await aufgabenResp.json();
 
-    // Zeilen-Dropdown
+    // Zeilen-Dropdown: Schlüssel anzeigen, Wert (Zeilennummer) als value speichern
+    // z.B. option text = "Binsfeld", option value = "3"
     const rowSelect = document.getElementById("rowSelect");
     rowSelect.innerHTML = "<option value=''>Wähle Zeile...</option>";
-    const uniqueRows = [...new Set(Object.values(aufgabenData).map(String))].sort();
-    uniqueRows.forEach(row => {
+    for (const key in aufgabenData) {
       const option = document.createElement("option");
-      option.value = row;
-      option.textContent = row;
+      option.value = aufgabenData[key]; // Zeilennummer als value
+      option.textContent = key;         // Name als Anzeige
       rowSelect.appendChild(option);
-    });
+    }
 
-    // Schlüssel-Dropdown – alle aufgaben
+    // Schlüssel-Dropdown: alle aufgaben-Schlüssel
     const keySelect = document.getElementById("keySelect");
     keySelect.innerHTML = "<option value=''>Wähle Schlüssel...</option>";
     for (const key in aufgabenData) {
@@ -301,12 +297,12 @@ async function loadData() {
 }
 
 async function writeToExcel() {
+  const row = document.getElementById("rowSelect").value;   // Zeilennummer
   const key = document.getElementById("keySelect").value;
-  const row = document.getElementById("rowSelect").value;
   const value = document.getElementById("valueInput").value;
 
-  if (!key) return showToast("Bitte einen Schlüssel auswählen!");
   if (!row) return showToast("Bitte eine Zeile auswählen!");
+  if (!key) return showToast("Bitte einen Schlüssel auswählen!");
   if (!value) return showToast("Bitte einen Wert eingeben!");
 
   const col = ffwData[key];
