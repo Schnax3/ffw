@@ -269,21 +269,20 @@ async function loadData() {
     const aufgabenResp = await fetch(`${firebaseBaseUrl}/aufgaben.json`);
     aufgabenData = await aufgabenResp.json();
 
-    // Zeilen-Dropdown: Schlüssel anzeigen, Wert (Zeilennummer) als value speichern
-    // z.B. option text = "Binsfeld", option value = "3"
+    // Zeilen-Dropdown: Namen aus aufgaben anzeigen, Zeilennummer als value
     const rowSelect = document.getElementById("rowSelect");
     rowSelect.innerHTML = "<option value=''>Wähle Zeile...</option>";
     for (const key in aufgabenData) {
       const option = document.createElement("option");
-      option.value = aufgabenData[key]; // Zeilennummer als value
-      option.textContent = key;         // Name als Anzeige
+      option.value = aufgabenData[key]; // Zeilennummer (z.B. "3")
+      option.textContent = key;         // Name (z.B. "Binsfeld")
       rowSelect.appendChild(option);
     }
 
-    // Schlüssel-Dropdown: alle aufgaben-Schlüssel
+    // Schlüssel-Dropdown: Schlüssel aus ffw anzeigen
     const keySelect = document.getElementById("keySelect");
     keySelect.innerHTML = "<option value=''>Wähle Schlüssel...</option>";
-    for (const key in aufgabenData) {
+    for (const key in ffwData) {
       const option = document.createElement("option");
       option.value = key;
       option.textContent = key;
@@ -297,15 +296,15 @@ async function loadData() {
 }
 
 async function writeToExcel() {
-  const row = document.getElementById("rowSelect").value;   // Zeilennummer
-  const key = document.getElementById("keySelect").value;
+  const row = document.getElementById("rowSelect").value;  // Zeilennummer
+  const key = document.getElementById("keySelect").value;  // Schlüssel aus ffw
   const value = document.getElementById("valueInput").value;
 
   if (!row) return showToast("Bitte eine Zeile auswählen!");
   if (!key) return showToast("Bitte einen Schlüssel auswählen!");
   if (!value) return showToast("Bitte einen Wert eingeben!");
 
-  const col = ffwData[key];
+  const col = ffwData[key]; // Spalte aus ffw (z.B. "B")
   if (!col) return showToast(`Spalte für "${key}" nicht in ffw gefunden!`);
 
   const cellKey = col + ";" + row;
