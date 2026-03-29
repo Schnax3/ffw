@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Firebase Excel Editor</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  label { display: block; margin-top: 10px; }
+  select, input, button { margin-top: 5px; padding: 5px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h2>Firebase Excel Editor</h2>
+
+<label for="keySelect">Wähle einen Schlüssel aus ffw:</label>
+<select id="keySelect">
+  <option value="">Lade Daten...</option>
+</select>
+
+<label for="valueInput">Wert eintragen:</label>
+<input type="text" id="valueInput">
+
+<button id="saveBtn">In Excel schreiben</button>
+
+<script>
+const firebaseBaseUrl = "https://exel-1cf7a-default-rtdb.europe-west1.firebasedatabase.app";
+let ffwData = {};
+
+// 🔹 1. Lade ffw-Daten
+async function loadFFW() {
+    const response = await fetch(`${firebaseBaseUrl}/ffw.json`);
+    ffwData = await response.json();
+
+    const select = document.getElementById("keySelect");
+    select.innerHTML = "";
+
+    for (const key in ffwData) {
+        const option = document.createElement("option");
+        option.value = key; // z.B. "Binsfeld"
+        option.textContent = key;
+        select.appendChild(option);
+    }
+}
+
+// 🔹 2. Schreiben in Excel (exel-Unterordner) per REST
+async function writeToExcel(key, value) {
+    const cell = ffwData[key]; // z.B. "B;3"
+    if (!cell) {
+        alert("Kein Zellwert für diesen Schlüssel gefunden!");
+        return;
+    }
+
+    const payload = {};
+    payload[cell] = value; // { "B;3": "Neuer Text" }
+
+    // PATCH, damit nur diese Zelle überschrieben wird
+    await fetch(`${firebaseBaseUrl}/excel.json`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    alert(`Wert "${value}" wurde in Zelle ${cell} geschrieben!`);
+}
+
+// 🔹 3. Button Event
+document.getElementById("saveBtn").addEventListener("click", async () => {
+    const key = document.getElementById("keySelect").value;
+    const value = document.getElementById("valueInput").value;
+
+    if (!key) return alert("Bitte einen Schlüssel auswählen!");
+    if (!value) return alert("Bitte einen Wert eingeben!");
+
+    await writeToExcel(key, value);
+});
+
+// 🔹 Initialisierung
+loadFFW();
+</script>
+
+</body>
+</html>
